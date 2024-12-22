@@ -61,8 +61,6 @@ export default function InteractiveAvatar() {
   async function startSession() {
     setIsLoadingSession(true);
     try {
-      // Request media permissions
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
       const newToken = await fetchAccessToken();
 
       avatar.current = new StreamingAvatar({
@@ -114,8 +112,7 @@ export default function InteractiveAvatar() {
       }
     } catch (error) {
       console.error("Error starting avatar session:", error);
-     // setDebug("Permission denied. Please enable microphone and camera access.");
-      // Continue with limited functionality or provide alternative options
+      setDebug("An error occurred while starting the session.");
     } finally {
       setIsLoadingSession(false);
     }
