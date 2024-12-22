@@ -60,54 +60,62 @@ export default function InteractiveAvatar() {
 
   async function startSession() {
     setIsLoadingSession(true);
-    const newToken = await fetchAccessToken();
-
-    avatar.current = new StreamingAvatar({
-      token: newToken,
-    });
-    avatar.current.on(StreamingEvents.AVATAR_START_TALKING, (e) => {
-      console.log("Avatar started talking", e);
-    });
-    avatar.current.on(StreamingEvents.AVATAR_STOP_TALKING, (e) => {
-      console.log("Avatar stopped talking", e);
-    });
-    avatar.current.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-      console.log("Stream disconnected");
-      endSession();
-    });
-    avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
-      console.log(">>>>> Stream ready:", event.detail);
-      setStream(event.detail);
-    });
-    avatar.current?.on(StreamingEvents.USER_START, (event) => {
-      console.log(">>>>> User started talking:", event);
-      setIsUserTalking(true);
-    });
-    avatar.current?.on(StreamingEvents.USER_STOP, (event) => {
-      console.log(">>>>> User stopped talking:", event);
-      setIsUserTalking(false);
-    });
     try {
-      const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.Low,
-        avatarName: avatarId,
-        knowledgeId: knowledgeId, // Or use a custom `knowledgeBase`.
-        voice: {
-          rate: 1.5, // 0.5 ~ 1.5
-          emotion: VoiceEmotion.EXCITED,
-        },
-        language: language,
-        disableIdleTimeout: true,
-      });
+      // Request media permissions
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+      const newToken = await fetchAccessToken();
 
-      setData(res);
-      // default to voice mode
-      await avatar.current?.startVoiceChat({
-        useSilencePrompt: false
+      avatar.current = new StreamingAvatar({
+        token: newToken,
       });
-      setChatMode("voice_mode");
+      avatar.current.on(StreamingEvents.AVATAR_START_TALKING, (e) => {
+        console.log("Avatar started talking", e);
+      });
+      avatar.current.on(StreamingEvents.AVATAR_STOP_TALKING, (e) => {
+        console.log("Avatar stopped talking", e);
+      });
+      avatar.current.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+        console.log("Stream disconnected");
+        endSession();
+      });
+      avatar.current?.on(StreamingEvents.STREAM_READY, (event) => {
+        console.log(">>>>> Stream ready:", event.detail);
+        setStream(event.detail);
+      });
+      avatar.current?.on(StreamingEvents.USER_START, (event) => {
+        console.log(">>>>> User started talking:", event);
+        setIsUserTalking(true);
+      });
+      avatar.current?.on(StreamingEvents.USER_STOP, (event) => {
+        console.log(">>>>> User stopped talking:", event);
+        setIsUserTalking(false);
+      });
+      try {
+        const res = await avatar.current.createStartAvatar({
+          quality: AvatarQuality.Low,
+          avatarName: avatarId,
+          knowledgeId: knowledgeId, // Or use a custom `knowledgeBase`.
+          voice: {
+            rate: 1.5, // 0.5 ~ 1.5
+            emotion: VoiceEmotion.EXCITED,
+          },
+          language: language,
+          disableIdleTimeout: true,
+        });
+
+        setData(res);
+        // default to voice mode
+        await avatar.current?.startVoiceChat({
+          useSilencePrompt: false
+        });
+        setChatMode("voice_mode");
+      } catch (error) {
+        console.error("Error starting avatar session:", error);
+      }
     } catch (error) {
       console.error("Error starting avatar session:", error);
+      setDebug("Permission denied. Please enable microphone and camera access.");
+      // Continue with limited functionality or provide alternative options
     } finally {
       setIsLoadingSession(false);
     }
@@ -180,7 +188,9 @@ export default function InteractiveAvatar() {
     if (stream && mediaStream.current) {
       mediaStream.current.srcObject = stream;
       mediaStream.current.onloadedmetadata = () => {
-        mediaStream.current!.play();
+        mediaStream.current!.play().catch(error => {
+          console.error("Error playing video:", error);
+        });
         setDebug("Playing");
       };
     }
