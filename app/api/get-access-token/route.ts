@@ -13,9 +13,18 @@ export async function POST() {
         headers: {
           "x-api-key": HEYGEN_API_KEY,
         },
-      },
+      }
     );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch token: ${res.statusText}`);
+    }
+
     const data = await res.json();
+
+    if (!data || !data.data || !data.data.token) {
+      throw new Error("Token is undefined or response structure has changed");
+    }
 
     return new Response(data.data.token, {
       status: 200,

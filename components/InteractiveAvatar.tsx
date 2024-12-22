@@ -116,14 +116,21 @@ export default function InteractiveAvatar() {
     setIsLoadingRepeat(true);
     if (!avatar.current) {
       setDebug("Avatar API not initialized");
-
       return;
     }
-    // speak({ text: text, task_type: TaskType.REPEAT })
-    await avatar.current.speak({ text: text, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
+
+    try {
+      // Use a task type that allows the avatar to process and respond to the input
+      await avatar.current.speak({
+        text: text,
+        taskType: TaskType.RESPOND, // Change this to the appropriate task type for response
+        taskMode: TaskMode.SYNC,
+      });
+    } catch (e) {
       setDebug(e.message);
-    });
-    setIsLoadingRepeat(false);
+    } finally {
+      setIsLoadingRepeat(false);
+    }
   }
   async function handleInterrupt() {
     if (!avatar.current) {
@@ -292,22 +299,21 @@ export default function InteractiveAvatar() {
             <Tab key="text_mode" title="Text mode" />
             <Tab key="voice_mode" title="Voice mode" />
           </Tabs>
-          {chatMode === "text_mode" ? (
-            <div className="w-full flex relative">
-              <InteractiveAvatarTextInput
-                disabled={!stream}
-                input={text}
-                label="Chat"
-                loading={isLoadingRepeat}
-                placeholder="Type something for the avatar to respond"
-                setInput={setText}
-                onSubmit={handleSpeak}
-              />
-              {text && (
-                <Chip className="absolute right-16 top-3">Listening</Chip>
-              )}
-            </div>
-          ) : (
+          <div className="w-full flex relative">
+            <InteractiveAvatarTextInput
+              disabled={!stream}
+              input={text}
+              label="Chat"
+              loading={isLoadingRepeat}
+              placeholder="Type something for the avatar to respond"
+              setInput={setText}
+              onSubmit={handleSpeak}
+            />
+            {text && (
+              <Chip className="absolute right-16 top-3">Listening</Chip>
+            )}
+          </div>
+          {chatMode === "voice_mode" && (
             <div className="w-full text-center">
               <Button
                 isDisabled={!isUserTalking}
