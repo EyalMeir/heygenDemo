@@ -123,11 +123,11 @@ export default function InteractiveAvatar() {
       // Use a task type that allows the avatar to process and respond to the input
       await avatar.current.speak({
         text: text,
-        taskType: TaskType.RESPOND, // Change this to the appropriate task type for response
+        taskType: TaskType.TALK, // Change this to the appropriate task type for response
         taskMode: TaskMode.SYNC,
       });
     } catch (e) {
-      setDebug(e.message);
+      setDebug((e as Error).message);
     } finally {
       setIsLoadingRepeat(false);
     }
