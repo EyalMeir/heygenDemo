@@ -114,7 +114,7 @@ export default function InteractiveAvatar() {
       }
     } catch (error) {
       console.error("Error starting avatar session:", error);
-      setDebug("Permission denied. Please enable microphone and camera access.");
+     // setDebug("Permission denied. Please enable microphone and camera access.");
       // Continue with limited functionality or provide alternative options
     } finally {
       setIsLoadingSession(false);
