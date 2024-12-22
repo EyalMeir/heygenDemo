@@ -110,6 +110,13 @@ export default function InteractiveAvatar() {
       } catch (error) {
         console.error("Error starting avatar session:", error);
       }
+
+      // Play the video when the session starts
+      if (mediaStream.current) {
+        mediaStream.current.play().catch(error => {
+          console.error("Error playing video:", error);
+        });
+      }
     } catch (error) {
       console.error("Error starting avatar session:", error);
       setDebug("An error occurred while starting the session.");
